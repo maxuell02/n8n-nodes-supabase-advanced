@@ -1,4 +1,4 @@
-# n8n-nodes-supabase-advanced
+# Supabase Ultra
 
 Community node for n8n providing advanced Supabase/PostgREST database operations.
 
@@ -16,7 +16,7 @@ Community node for n8n providing advanced Supabase/PostgREST database operations
 - Conflict Columns and Ignore Duplicates for Upsert
 
 ## Install
-Settings → Community Nodes → Install → `n8n-nodes-supabase-advanced`
+Settings → Community Nodes → Install → `n8n-nodes-supabase-ultra`
 
 ## Credentials
 Supabase URL and API Key. For self-hosted Supabase, use the base URL of the instance.

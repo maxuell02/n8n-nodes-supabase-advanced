@@ -4,7 +4,7 @@ type Op='select'|'insert'|'upsert'|'update'|'delete'|'count'|'rpc';
 const url=(s:string)=>s.replace(/\/+$/,'');
 const json=(s:string,l:string)=>{try{return JSON.parse(s)}catch{throw new Error(`${l} contém JSON inválido.`)}};
 export class SupabaseAdvanced implements INodeType {
- description: INodeTypeDescription={displayName:'Supabase Advanced',name:'supabaseAdvanced',icon:'file:supabase.svg',group:['transform'],version:1,subtitle:'={{$parameter["operation"]}}',description:'Advanced Supabase/PostgREST operations for n8n.',defaults:{name:'Supabase Advanced'},inputs:['main'],outputs:['main'],credentials:[{name:'supabaseAdvancedApi',required:true}],properties:[
+ description: INodeTypeDescription={displayName:'SupabaseUltra',name:'supabaseUltra',icon:'file:supabase.svg',group:['transform'],version:1,subtitle:'={{$parameter["operation"]}}',description:'Advanced Supabase/PostgREST operations for n8n.',defaults:{name:'Supabase Advanced'},inputs:['main'],outputs:['main'],credentials:[{name:'supabaseAdvancedApi',required:true}],properties:[
  {displayName:'Operation',name:'operation',type:'options',options:[{name:'Select',value:'select'},{name:'Insert',value:'insert'},{name:'Upsert',value:'upsert'},{name:'Update',value:'update'},{name:'Delete',value:'delete'},{name:'Count',value:'count'},{name:'RPC',value:'rpc'}],default:'select'},
  {displayName:'Table',name:'table',type:'string',default:'',required:true,displayOptions:{show:{operation:['select','insert','upsert','update','delete','count']}}},
  {displayName:'Columns',name:'columns',type:'string',default:'*',displayOptions:{show:{operation:['select']}}},
@@ -87,3 +87,5 @@ const req = async (
   throw new Error(`Operação não suportada: ${op}`);
  }
 }
+
+

@@ -26,7 +26,58 @@ export class SupabaseAdvanced implements INodeType {
   const base=`${url(String(c.supabaseUrl))}/rest/v1`, key=String(c.apiKey); if(!base||!key) throw new Error('Supabase URL e API Key são obrigatórios.');
   const headers:Record<string,string>={apikey:key,Authorization:`Bearer ${key}`,Accept:'application/json'}; const out:INodeExecutionData[]=[];
   const filters=(i:number)=>{const raw=this.getNodeParameter('filters',i,{}) as {filter?:Array<{field:string;operator:string;value:string}>}; const q:Record<string,string>={}; for(const f of raw?.filter??[]) if(f.field) q[f.field]=`${f.operator}.${String(f.value??'').trim()}`; return q};
-  const req=async(method:'GET'|'POST'|'PATCH'|'DELETE',u:string,body?:unknown,qs?:Record<string,string>,extra?:Record<string,string>)=>{try{return await this.helpers.httpRequest({method,url:u,headers:{...headers,...extra,...(method!=='GET'?{'Content-Type':'application/json'}:{})},qs,body,json:true})}catch(e){const x=e as any,b=x?.response?.body;if(b) throw new Error(`Supabase${b.code?` [${b.code}]`:''}: ${b.message??'Erro na API'}${b.details?` Detalhes: ${b.details}`:''}${b.hint?` Sugestão: ${b.hint}`:''}`);throw e}};
+const req = async (
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+  u: string,
+  body?: Record<string, unknown> | Array<Record<string, unknown>>,
+  qs?: Record<string, string>,
+  extra?: Record<string, string>,
+) => {
+  try {
+    return await this.helpers.httpRequest({
+      method,
+      url: u,
+      headers: {
+        ...headers,
+        ...extra,
+        ...(method !== 'GET'
+          ? {
+              'Content-Type': 'application/json',
+            }
+          : {}),
+      },
+      qs,
+      body,
+      json: true,
+    });
+  } catch (e) {
+    const x = e as {
+      response?: {
+        body?: {
+          code?: string;
+          message?: string;
+          details?: string;
+          hint?: string;
+        };
+      };
+      message?: string;
+    };
+
+    const b = x?.response?.body;
+
+    if (b) {
+      throw new Error(
+        `Supabase${b.code ? ` [${b.code}]` : ''}: ${
+          b.message ?? 'Erro na API'
+        }${b.details ? ` Detalhes: ${b.details}` : ''}${
+          b.hint ? ` Sugestão: ${b.hint}` : ''
+        }`,
+      );
+    }
+
+    throw e;
+  }
+};
   if(op==='rpc'){const fn=String(this.getNodeParameter('functionName',0));const r=await req('POST',`${base}/rpc/${encodeURIComponent(fn)}`,json(String(this.getNodeParameter('rpcArguments',0)),'Arguments'));for(const x of (Array.isArray(r)?r:[r])) out.push({json:x as any});return[out]}
   const table=String(this.getNodeParameter('table',0)), u=`${base}/${encodeURIComponent(table)}`;
   if(op==='select'){const all=this.getNodeParameter('returnAll',0) as boolean, lim=Math.max(1,Number(this.getNodeParameter('limit',0))), off=Math.max(0,Number(this.getNodeParameter('offset',0))), cols=String(this.getNodeParameter('columns',0)||'*'), order=String(this.getNodeParameter('orderBy',0)||''); let pos=off; do{const r=await req('GET',u,undefined,{select:cols,...filters(0),...(order?{order}:{}),limit:String(lim),offset:String(pos)});const rows=Array.isArray(r)?r:[];for(const x of rows)out.push({json:x as any});if(!all||rows.length<lim)break;pos+=lim}while(true);return[out]}
